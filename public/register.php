@@ -2,10 +2,6 @@
 require_once __DIR__ . '/../src/bootstrap.php';
 $error = "";
 
-if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-}
-
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $name = trim($_POST['name'] ?? "");
     $email = trim($_POST['email'] ?? "");
