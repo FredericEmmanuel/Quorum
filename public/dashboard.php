@@ -1,21 +1,7 @@
 <?php 
 require_once __DIR__ . '/../src/bootstrap.php';
-
-if (empty($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
-}
-
-$query = db()->prepare("SELECT name FROM users WHERE id = ?");
-$query->execute([$_SESSION['user_id']]);
-$user = $query->fetch();
-
-if ($user === false) {
-    session_destroy();
-    header("Location: login.php");
-    exit;
-}
-?>                          
+$user = require_user();
+?>
 
 <!DOCTYPE html>
 <html lang="en">

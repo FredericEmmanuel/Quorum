@@ -5,6 +5,7 @@ define('ROOT', dirname(__DIR__));
 require_once ROOT . '/src/config.php';
 require_once ROOT . '/src/db.php';
 require_once ROOT . '/src/helpers.php';
+require_once ROOT . '/src/guard.php';
 session_start();
 
 if (empty($_SESSION['csrf_token'])) {
