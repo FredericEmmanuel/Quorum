@@ -5,3 +5,4 @@ define('ROOT', dirname(__DIR__));
 require_once ROOT . '/src/config.php';
 require_once ROOT . '/src/db.php';
 require_once ROOT . '/src/helpers.php';
+session_start();
