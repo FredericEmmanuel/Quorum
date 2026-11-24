@@ -1,0 +1,71 @@
+<?php 
+require_once __DIR__ . '/../src/bootstrap.php';
+$user = require_user();
+$error = "";
+$success = "";
+
+$ukm_id = (int) ($_GET['ukm_id'] ?? 0);
+require_ukm_role($ukm_id, ['pengurus', 'ketua']);
+
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $csrf_token = $_POST['csrf_token'] ?? "";
+    $user_id = (int) ($_POST['user_id'] ?? 0);
+    if (!hash_equals($_SESSION['csrf_token'], $csrf_token)) {
+        $error = "Terjadi Kesalahan";
+    } else {
+        $check = db()->prepare("SELECT user_id FROM anggota_ukm WHERE user_id = ? AND ukm_id = ? AND status = 'pending'");
+        $check->execute([$user_id, $ukm_id]);
+
+        if ($check->fetch() === false) {
+            $error = "Anggota Tidak ditemukan";
+        } else {
+            $approve = db()->prepare("UPDATE anggota_ukm SET status = 'active', joined_at = NOW() WHERE user_id = ? AND ukm_id = ?");
+            $approve->execute([$user_id, $ukm_id]);
+            $success =  "Berhasil";
+        }
+
+    }
+}
+$pending_query = db()->prepare("SELECT u.id, u.name FROM users u JOIN anggota_ukm aukm ON u.id=aukm.user_id WHERE aukm.status = 'pending' AND aukm.ukm_id = ?");
+$pending_query->execute([$ukm_id]);
+$pending = $pending_query->fetchAll();
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quorum Kelola</title>
+</head>
+<body>
+    <?php if ($error !== ""): ?>
+        <p><?php echo e($error); ?></p>
+    <?php endif; ?> 
+
+    <?php if ($success !== ""): ?>
+        <p><?php echo e($success); ?></p>
+    <?php endif; ?>
+    
+    <h1>Kelola UKM</h1>
+    <?php if (count($pending) === 0): ?>
+        <p>Tidak Ada Anggota Baru</p>
+    <?php else: ?>     
+        <h2>Status Pending: </h2>
+        <ul>
+            <?php foreach ($pending as $pending_members): ?>
+                <li>
+                    <?php echo e($pending_members['name']); ?>
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                        <input type="hidden" name="user_id" value="<?php echo e((string) $pending_members['id']); ?>">
+
+                        <input type="submit" value="Terima">
+                    </form>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php endif; ?>
+</body>
+</html>

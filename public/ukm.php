@@ -71,7 +71,8 @@ $ukm_list = $query->fetchAll();
     <?php else: ?>
         <ul>
             <?php foreach ($ukm_list as $ukm): ?>
-                <li><?php echo e($ukm['name']); ?>
+                <li>
+                    <?php echo e($ukm['name']); ?> <br>
                     <?php if (isset($my_status[$ukm['id']])): ?>
                         <span>Status: <?php echo e($labels[$my_status[$ukm['id']]] ?? 'Tidak Diketahui'); ?></span>
                     <?php else: ?>  
