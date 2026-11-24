@@ -10,6 +10,7 @@ require_ukm_role($ukm_id, ['pengurus', 'ketua']);
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $csrf_token = $_POST['csrf_token'] ?? "";
     $user_id = (int) ($_POST['user_id'] ?? 0);
+    $action = $_POST['action'] ?? "";
     if (!hash_equals($_SESSION['csrf_token'], $csrf_token)) {
         $error = "Terjadi Kesalahan";
     } else {
@@ -19,9 +20,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($check->fetch() === false) {
             $error = "Anggota Tidak ditemukan";
         } else {
-            $approve = db()->prepare("UPDATE anggota_ukm SET status = 'active', joined_at = NOW() WHERE user_id = ? AND ukm_id = ?");
-            $approve->execute([$user_id, $ukm_id]);
-            $success =  "Berhasil";
+            if ($action === 'accept') {
+                $approve = db()->prepare("UPDATE anggota_ukm SET status = 'active', joined_at = NOW() WHERE user_id = ? AND ukm_id = ?");
+                $approve->execute([$user_id, $ukm_id]);
+                $success =  "Berhasil Diterima";
+            } elseif ($action === 'decline') {
+                $decline = db()->prepare("DELETE FROM anggota_ukm WHERE user_id = ? AND ukm_id = ?");
+                $decline->execute([$user_id, $ukm_id]);
+                $success =  "Berhasil Ditolak";
+            } else {
+                $error = "Aksi Tidak Dikenal";
+            }
+            
         }
 
     }
@@ -60,8 +70,14 @@ $pending = $pending_query->fetchAll();
                     <form method="POST">
                         <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
                         <input type="hidden" name="user_id" value="<?php echo e((string) $pending_members['id']); ?>">
-
+                        <input type="hidden" name="action" value="accept">
                         <input type="submit" value="Terima">
+                    </form>
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                        <input type="hidden" name="user_id" value="<?php echo e((string) $pending_members['id']); ?>">
+                        <input type="hidden" name="action" value="decline">
+                        <input type="submit" value="Tolak">
                     </form>
                 </li>
             <?php endforeach; ?>

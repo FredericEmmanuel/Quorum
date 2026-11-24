@@ -42,7 +42,7 @@ foreach ($rows as $row) {
 
 $labels = [
     'pending' => 'Menunggu Konfirmasi',
-    'active' => 'Anda diterima',
+    'active' => 'Anda Diterima',
 ];
 
 $query = db()->query("SELECT id, name FROM ukm ORDER BY name ASC");
