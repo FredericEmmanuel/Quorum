@@ -5,7 +5,7 @@ function require_user(): array {
         exit;
     }
 
-    $query = db()->prepare("SELECT id, name FROM users WHERE id = ?");
+    $query = db()->prepare("SELECT id, name, is_admin FROM users WHERE id = ?");
     $query->execute([$_SESSION['user_id']]);
     $user = $query->fetch();
 
