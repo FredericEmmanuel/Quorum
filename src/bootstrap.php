@@ -6,6 +6,7 @@ require_once ROOT . '/src/config.php';
 require_once ROOT . '/src/db.php';
 require_once ROOT . '/src/helpers.php';
 require_once ROOT . '/src/guard.php';
+date_default_timezone_set('Asia/Jakarta');
 session_start();
 
 if (empty($_SESSION['csrf_token'])) {
