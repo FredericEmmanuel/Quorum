@@ -20,6 +20,7 @@ $role = $role ?? "";
                 <a href="create_kegiatan.php?ukm_id=<?php echo e((string) $ukm_id); ?>">Buat Kegiatan</a>
                 <a href="anggota_manage.php?ukm_id=<?php echo e((string) $ukm_id); ?>">Kelola Anggota</a>
                 <a href="kehadiran_manage.php?ukm_id=<?php echo e((string) $ukm_id); ?>">Kehadiran</a>
+                <a href="laporan.php?ukm_id=<?php echo e((string) $ukm_id); ?>">Laporan</a>
             <?php endif; ?>
         <?php endif; ?>
     </nav>
