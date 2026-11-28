@@ -4,7 +4,6 @@ $user = require_user();
 $error = "";
 $success = "";
 $row = "";
-$role = $row['role'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $ukm_id = (int) ($_POST['ukm_id'] ?? 0);

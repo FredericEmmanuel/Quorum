@@ -3,7 +3,6 @@ require_once __DIR__ . '/../src/bootstrap.php';
 $user = require_user();
 $ukm_id = (int) ($_GET['ukm_id'] ?? 0);
 $row = "";
-$role = $row['role'];
 $score = 0;
 if ($ukm_id !== 0) {
     $row = require_ukm_role($ukm_id, ['anggota', 'pengurus', 'ketua']);

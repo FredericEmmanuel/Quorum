@@ -49,6 +49,7 @@ require __DIR__ . '/../templates/header.php';
 <?php if ($error !== ""): ?>
     <p><?php echo e($error); ?></p>
 <?php endif; ?>
+
 <form method="POST">
     <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
     <label for="title">Nama kegiatan: </label>

@@ -1,7 +1,15 @@
 <?php
 $ukm_id = $ukm_id ?? 0;
 $role = $role ?? "";
+$pw_error = "";
+$pw_success = "";
+if (isset($_SESSION['pw_flash'])) {
+    $pw_error = $_SESSION['pw_flash']['error'];
+    $pw_success = $_SESSION['pw_flash']['success'];
+    unset($_SESSION['pw_flash']);
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +21,7 @@ $role = $role ?? "";
     <nav>
         <a href="dashboard.php">Dashboard</a>
         <a href="ukm.php">Daftar UKM</a>
+        <button type="button" onclick="document.getElementById('pw-dialog').showModal()">Ganti Password</button>
         <?php if ($ukm_id !== 0 && $role !== ""): ?>
             <a href="kegiatan.php?ukm_id=<?php echo e((string) $ukm_id); ?>">Kegiatan</a>
 
@@ -24,9 +33,39 @@ $role = $role ?? "";
             <?php endif; ?>
         <?php endif; ?>
     </nav>
+
     <form action="logout.php" method="POST">
         <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
         <input type="submit" value="Logout">
     </form>
+    
+    <dialog id="pw-dialog"> 
+        <?php if ($pw_error !== ""): ?>
+            <p><?php echo e($pw_error); ?></p>
+        <?php endif; ?>
 
+        <?php if ($pw_success !== ""): ?>
+            <p><?php echo e($pw_success); ?></p>
+        <?php endif; ?>
 
+        <form method="post" action="change_password.php">
+            <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+            <input type="hidden" name="back" value="<?php echo e($_SERVER['REQUEST_URI']); ?>">
+            <label for="old_pass">Password Lama: </label>
+                <input type="password" name="old_pass" id="old_pass" required> <br>
+            <label for="new_pass">Password Baru: </label>
+                <input type="password" name="new_pass" id="new_pass" required minlength="8"> <br>
+            <label for="conf">Konfirmasi Password Baru: </label>
+                <input type="password" name="conf" id="conf" required minlength="8">
+            
+            <input type="submit" value="Simpan">
+        </form>
+
+        <form method="dialog">
+            <button>Close</button>
+        </form>
+    </dialog>
+
+    <?php if ($pw_error !== "" || $pw_success !== ""): ?>
+        <script>document.getElementById('pw-dialog').showModal();</script>
+    <?php endif; ?>
