@@ -1,8 +1,10 @@
 <?php 
 require_once __DIR__ . '/../src/bootstrap.php';
-require_user();
+$user = require_user();
 $error = "";
 $success = "";
+$row = "";
+$role = $row['role'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $ukm_id = (int) ($_POST['ukm_id'] ?? 0);
@@ -48,43 +50,37 @@ $labels = [
 $query = db()->query("SELECT id, name FROM ukm ORDER BY name ASC");
 $ukm_list = $query->fetchAll();
 
+$page_title = "Quorum UKM";
+require __DIR__ . '/../templates/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quorum UKM</title>
-</head>
-<body>
-    <?php if ($success !== ""): ?>
-        <p><?php echo e($success); ?></p>
-    <?php endif; ?>
+<?php if ($success !== ""): ?>
+    <p><?php echo e($success); ?></p>
+<?php endif; ?>
 
-    <?php if ($error !== ""): ?>
-        <p><?php echo e($error); ?></p>
-    <?php endif; ?>
+<?php if ($error !== ""): ?>
+    <p><?php echo e($error); ?></p>
+<?php endif; ?>
 
-    <?php if (count($ukm_list) === 0): ?>
-        <p>Belum ada UKM</p>
-    <?php else: ?>
-        <ul>
-            <?php foreach ($ukm_list as $ukm): ?>
-                <li>
-                    <?php echo e($ukm['name']); ?> <br>
-                    <?php if (isset($my_status[$ukm['id']])): ?>
-                        <span>Status: <?php echo e($labels[$my_status[$ukm['id']]] ?? 'Tidak Diketahui'); ?></span>
-                    <?php else: ?>  
-                        <form method="POST">
-                            <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
-                            <input type="hidden" name="ukm_id" value="<?php echo e((string) $ukm['id']); ?>">
-                            <input type="submit" value="Gabung UKM">
-                        </form>
-                    <?php endif; ?>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
-</body>
-</html>
+<?php if (count($ukm_list) === 0): ?>
+    <p>Belum ada UKM</p>
+<?php else: ?>
+    <ul>
+        <?php foreach ($ukm_list as $ukm): ?>
+            <li>
+                <?php echo e($ukm['name']); ?> <br>
+                <?php if (isset($my_status[$ukm['id']])): ?>
+                    <span>Status: <?php echo e($labels[$my_status[$ukm['id']]] ?? 'Tidak Diketahui'); ?></span>
+                <?php else: ?>  
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                        <input type="hidden" name="ukm_id" value="<?php echo e((string) $ukm['id']); ?>">
+                        <input type="submit" value="Gabung UKM">
+                    </form>
+                <?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<?php require __DIR__ . '/../templates/footer.php'; ?>

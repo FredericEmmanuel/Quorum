@@ -5,7 +5,8 @@ $error = "";
 $success = "";
 
 $ukm_id = (int) ($_GET['ukm_id'] ?? 0);
-require_ukm_role($ukm_id, ['pengurus', 'ketua']);
+$row = require_ukm_role($ukm_id, ['pengurus', 'ketua']);
+$role = $row['role'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $csrf_token = $_POST['csrf_token'] ?? "";
@@ -40,48 +41,42 @@ $pending_query = db()->prepare("SELECT u.id, u.name FROM users u JOIN anggota_uk
 $pending_query->execute([$ukm_id]);
 $pending = $pending_query->fetchAll();
 
+$page_title = "Quorum Kelola";
+require __DIR__ . '/../templates/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quorum Kelola</title>
-</head>
-<body>
-    <?php if ($error !== ""): ?>
-        <p><?php echo e($error); ?></p>
-    <?php endif; ?> 
+<?php if ($error !== ""): ?>
+    <p><?php echo e($error); ?></p>
+<?php endif; ?> 
 
-    <?php if ($success !== ""): ?>
-        <p><?php echo e($success); ?></p>
-    <?php endif; ?>
-    
-    <h1>Kelola UKM</h1>
-    <?php if (count($pending) === 0): ?>
-        <p>Tidak Ada Anggota Baru</p>
-    <?php else: ?>     
-        <h2>Status Pending: </h2>
-        <ul>
-            <?php foreach ($pending as $pending_members): ?>
-                <li>
-                    <?php echo e($pending_members['name']); ?>
-                    <form method="POST">
-                        <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
-                        <input type="hidden" name="user_id" value="<?php echo e((string) $pending_members['id']); ?>">
-                        <input type="hidden" name="action" value="accept">
-                        <input type="submit" value="Terima">
-                    </form>
-                    <form method="POST">
-                        <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
-                        <input type="hidden" name="user_id" value="<?php echo e((string) $pending_members['id']); ?>">
-                        <input type="hidden" name="action" value="decline">
-                        <input type="submit" value="Tolak">
-                    </form>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
-</body>
-</html>
+<?php if ($success !== ""): ?>
+    <p><?php echo e($success); ?></p>
+<?php endif; ?>
+
+<h1>Kelola UKM</h1>
+<?php if (count($pending) === 0): ?>
+    <p>Tidak Ada Anggota Baru</p>
+<?php else: ?>     
+    <h2>Status Pending: </h2>
+    <ul>
+        <?php foreach ($pending as $pending_members): ?>
+            <li>
+                <?php echo e($pending_members['name']); ?>
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                    <input type="hidden" name="user_id" value="<?php echo e((string) $pending_members['id']); ?>">
+                    <input type="hidden" name="action" value="accept">
+                    <input type="submit" value="Terima">
+                </form>
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                    <input type="hidden" name="user_id" value="<?php echo e((string) $pending_members['id']); ?>">
+                    <input type="hidden" name="action" value="decline">
+                    <input type="submit" value="Tolak">
+                </form>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<?php require __DIR__ . '/../templates/footer.php'; ?>

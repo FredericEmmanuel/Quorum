@@ -4,7 +4,8 @@ $user = require_user();
 $error = "";
 $success = "";
 $ukm_id = (int) ($_GET['ukm_id'] ?? 0);
-require_ukm_role($ukm_id, ['anggota', 'pengurus', 'ketua']);
+$row = require_ukm_role($ukm_id, ['anggota', 'pengurus', 'ketua']);
+$role = $row['role'];
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $csrf_token = $_POST['csrf_token'] ?? "";
@@ -104,65 +105,60 @@ $labels = [
 $query = db()->prepare("SELECT id, title, event_date, quota FROM kegiatan WHERE ukm_id = ? ORDER BY event_date");
 $query->execute([$ukm_id]);
 $kegiatan_list = $query->fetchAll();
+
+$page_title = "Quorum Kegiatan";
+require __DIR__ . '/../templates/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quorum Kegiatan</title>
-</head>
-<body>
-    <?php if ($success !== ""): ?>
-        <p><?php echo e($success); ?></p>
-    <?php endif; ?>
+<?php if ($success !== ""): ?>
+    <p><?php echo e($success); ?></p>
+<?php endif; ?>
 
-    <?php if ($error !== ""): ?>
-        <p><?php echo e($error); ?></p>
-    <?php endif; ?>
+<?php if ($error !== ""): ?>
+    <p><?php echo e($error); ?></p>
+<?php endif; ?>
 
-    <?php if (count($kegiatan_list) === 0): ?>
-        <p><?php echo 'Belum Ada Kegiatan'; ?></p>
-    <?php else: ?>
-        <ul>
-            <?php foreach ($kegiatan_list as $kegiatan): ?>
-                <li>
-                    <h2><?php echo e($kegiatan['title']); ?></h2>
-                    <p><?php echo 'Tanggal Kegiatan ' . e($kegiatan['event_date']); ?> <br>
-                    <?php echo 'Kuota: ' . e((string) $kegiatan['quota']); ?></p>
+<?php if (count($kegiatan_list) === 0): ?>
+    <p><?php echo 'Belum Ada Kegiatan'; ?></p>
+<?php else: ?>
+    <ul>
+        <?php foreach ($kegiatan_list as $kegiatan): ?>
+            <li>
+                <h2><?php echo e($kegiatan['title']); ?></h2>
+                <p><?php echo 'Tanggal Kegiatan ' . e($kegiatan['event_date']); ?> <br>
+                <?php echo 'Kuota: ' . e((string) $kegiatan['quota']); ?></p>
 
-                    <?php if (!isset($my_registered[$kegiatan['id']])): ?>
-                        <form method="POST">
-                            <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
-                            <input type="hidden" name="kegiatan_id" value="<?php echo e((string) $kegiatan['id']); ?>">
-                            <input type="hidden" name="action" value="register">
-                            <input type="submit" value="Daftar">
-                        </form>
+                <?php if (!isset($my_registered[$kegiatan['id']])): ?>
+                    <form method="POST">
+                        <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                        <input type="hidden" name="kegiatan_id" value="<?php echo e((string) $kegiatan['id']); ?>">
+                        <input type="hidden" name="action" value="register">
+                        <input type="submit" value="Daftar">
+                    </form>
+                <?php else: ?>
+                    <span>Sudah Terdaftar</span>
+                    <?php if (isset($my_attend[$kegiatan['id']])): ?>
+                        <span>Kehadiran: <?php echo e($labels[$my_attend[$kegiatan['id']]] ?? 'Tidak Diketahui'); ?></span>
                     <?php else: ?>
-                        <span>Sudah Terdaftar</span>
-                        <?php if (isset($my_attend[$kegiatan['id']])): ?>
-                            <span>Kehadiran: <?php echo e($labels[$my_attend[$kegiatan['id']]] ?? 'Tidak Diketahui'); ?></span>
-                        <?php else: ?>
-                            <?php if (strtotime($kegiatan['event_date']) <= time()): ?>
-                                <form method="POST">
-                                    <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
-                                    <input type="hidden" name="kegiatan_id" value="<?php echo e((string) $kegiatan['id']); ?>">
-                                    <input type="hidden" name="action" value="attend">
-                                    <input type="submit" value="Absen">
-                                </form>
-                            <?php endif; ?>
-                                <form method="POST">
-                                    <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
-                                    <input type="hidden" name="kegiatan_id" value="<?php echo e((string) $kegiatan['id']); ?>">
-                                    <input type="hidden" name="action" value="cancel">
-                                    <input type="submit" value="Batal">
-                                </form>
+                        <?php if (strtotime($kegiatan['event_date']) <= time()): ?>
+                            <form method="POST">
+                                <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                                <input type="hidden" name="kegiatan_id" value="<?php echo e((string) $kegiatan['id']); ?>">
+                                <input type="hidden" name="action" value="attend">
+                                <input type="submit" value="Absen">
+                            </form>
                         <?php endif; ?>
+                            <form method="POST">
+                                <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                                <input type="hidden" name="kegiatan_id" value="<?php echo e((string) $kegiatan['id']); ?>">
+                                <input type="hidden" name="action" value="cancel">
+                                <input type="submit" value="Batal">
+                            </form>
                     <?php endif; ?>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
-</body>
-</html>
+                <?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<?php require __DIR__ . '/../templates/footer.php'; ?>

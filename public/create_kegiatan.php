@@ -5,8 +5,8 @@ $error = "";
 $success = "";
 
 $ukm_id = (int) ($_GET['ukm_id'] ?? 0);
-require_ukm_role($ukm_id, ['pengurus', 'ketua']);
-
+$row = require_ukm_role($ukm_id, ['pengurus', 'ketua']);
+$role = $row['role'];
 if (isset($_GET['saved'])) {
     $success = "Kegiatan Tersimpan";
 }
@@ -37,35 +37,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit;
     }
 }
+
+$page_title = "Quorum create kegiatan";
+require __DIR__ . '/../templates/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quorum create kegiatan</title>
-</head>
-<body>
-    <?php if ($success !== ""): ?>
-        <p><?php echo e($success); ?></p>
-    <?php endif; ?>
+<?php if ($success !== ""): ?>
+    <p><?php echo e($success); ?></p>
+<?php endif; ?>
 
-    <?php if ($error !== ""): ?>
-        <p><?php echo e($error); ?></p>
-    <?php endif; ?>
-    <form method="POST">
-        <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
-        <label for="title">Nama kegiatan: </label>
-            <input type="text" name="title" id="title" required> <br>
-        <label for="desc">deskripsi: </label>
-            <textarea name="desc" id="desc"></textarea> <br>
-        <label for="event_date">Tanggal: </label>
-            <input type="datetime-local" name="event_date" id="event_date" required> <br>
-        <label for="quota">Kuota: </label>
-            <input type="number" name="quota" id="quota" min="1" required> <br>
-        
-        <input type="submit" value="Simpan">
-    </form>
-</body>
-</html>
+<?php if ($error !== ""): ?>
+    <p><?php echo e($error); ?></p>
+<?php endif; ?>
+<form method="POST">
+    <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+    <label for="title">Nama kegiatan: </label>
+        <input type="text" name="title" id="title" required> <br>
+    <label for="desc">deskripsi: </label>
+        <textarea name="desc" id="desc"></textarea> <br>
+    <label for="event_date">Tanggal: </label>
+        <input type="datetime-local" name="event_date" id="event_date" required> <br>
+    <label for="quota">Kuota: </label>
+        <input type="number" name="quota" id="quota" min="1" required> <br>
+    
+    <input type="submit" value="Simpan">
+</form>
+
+<?php require __DIR__ . '/../templates/footer.php'; ?>

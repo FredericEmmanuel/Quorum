@@ -2,7 +2,8 @@
 require_once __DIR__ . '/../src/bootstrap.php';
 $user = require_user();
 $ukm_id = (int) ($_GET['ukm_id'] ?? 0);
-require_ukm_role($ukm_id, ['pengurus', 'ketua']);
+$row = require_ukm_role($ukm_id, ['pengurus', 'ketua']);
+$role = $row['role'];
 $error = "";
 $success = "";
 
@@ -44,48 +45,43 @@ $query = db()->prepare(
 );
 $query->execute([$ukm_id]);
 $pending_attend = $query->fetchAll();
+
+$page_title = "Quorum Manage kehadiran";
+require __DIR__ . '/../templates/header.php';
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quorum Manage kehadiran</title>
-</head>
-<body>
-    <?php if ($success !== ""): ?>
-        <p><?php echo e($success); ?></p>
-    <?php endif; ?>
+<?php if ($success !== ""): ?>
+    <p><?php echo e($success); ?></p>
+<?php endif; ?>
 
-    <?php if ($error !== ""): ?>
-        <p><?php echo e($error); ?></p>
-    <?php endif; ?>
+<?php if ($error !== ""): ?>
+    <p><?php echo e($error); ?></p>
+<?php endif; ?>
 
-    <?php if (count($pending_attend) === 0): ?>
-        <p><?php echo "Belum Ada Absen"; ?></p>
-    <?php else: ?>
-        <ul>
-            <?php foreach ($pending_attend as $pending): ?>
-                <li>
-                    <?php echo e($pending['name']); ?> - <?php echo e($pending['title']); ?>
-                    <form method="POST">
-                        <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
-                        <input type="hidden" name="kegiatan_id" value="<?php echo e((string) $pending['kegiatan_id']); ?>">
-                        <input type="hidden" name="user_id" value="<?php echo e((string) $pending['user_id']); ?>">
-                        <input type="hidden" name="action" value="accept">
-                        <input type="submit" value="Terima">
-                    </form>
-                    <form method="POST">
-                        <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
-                        <input type="hidden" name="kegiatan_id" value="<?php echo e((string) $pending['kegiatan_id']); ?>">
-                        <input type="hidden" name="user_id" value="<?php echo e((string) $pending['user_id']); ?>">
-                        <input type="hidden" name="action" value="decline">
-                        <input type="submit" value="Tolak">
-                    </form>
-                </li>
-            <?php endforeach; ?>
-        </ul>
-    <?php endif; ?>
-</body>
-</html>
+<?php if (count($pending_attend) === 0): ?>
+    <p><?php echo "Belum Ada Absen"; ?></p>
+<?php else: ?>
+    <ul>
+        <?php foreach ($pending_attend as $pending): ?>
+            <li>
+                <?php echo e($pending['name']); ?> - <?php echo e($pending['title']); ?>
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                    <input type="hidden" name="kegiatan_id" value="<?php echo e((string) $pending['kegiatan_id']); ?>">
+                    <input type="hidden" name="user_id" value="<?php echo e((string) $pending['user_id']); ?>">
+                    <input type="hidden" name="action" value="accept">
+                    <input type="submit" value="Terima">
+                </form>
+                <form method="POST">
+                    <input type="hidden" name="csrf_token" value="<?php echo e($_SESSION['csrf_token']); ?>">
+                    <input type="hidden" name="kegiatan_id" value="<?php echo e((string) $pending['kegiatan_id']); ?>">
+                    <input type="hidden" name="user_id" value="<?php echo e((string) $pending['user_id']); ?>">
+                    <input type="hidden" name="action" value="decline">
+                    <input type="submit" value="Tolak">
+                </form>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+<?php endif; ?>
+
+<?php require __DIR__ . '/../templates/footer.php'; ?>
